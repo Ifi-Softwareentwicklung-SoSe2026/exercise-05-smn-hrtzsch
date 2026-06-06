@@ -120,7 +120,7 @@ Kevin ersetzt den folgenden Platzhalter mit einem LiaScript-kompatiblen PlantUML
 - paste and copy your code! Mit Reloads verlieren Sie Ihre Eingaben, daher vorher sichern!
 
 <!-- kevin-uml:start -->
-```text
+```text @plantUML
 @startuml
 class Turnier {
   - name: String
@@ -173,6 +173,6 @@ PersistenceManager ..> Spiel : persistiert
 PersistenceManager ..> Wette : persistiert
 PersistenceManager ..> Benutzer : persistiert
 @enduml
-@plantUML.eval(png)
 ```
+@plantUML.eval(png)
 <!-- kevin-uml:end -->
