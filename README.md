@@ -122,6 +122,10 @@ Kevin ersetzt den folgenden Platzhalter mit einem LiaScript-kompatiblen PlantUML
 <!-- kevin-uml:start -->
 ```text
 @startuml
+class Gruppe {
+  - name: String
+}
+
 class Mannschaft {
   - name: String
 }
@@ -155,6 +159,7 @@ class PersistenceManager {
   + load(): Object
 }
 
+Gruppe "1" *-- "*" Mannschaft : enthält
 Mannschaft "2" -- "*" Spiel : nimmt teil (Heim/Auswärts)
 Spiel "1" *-- "*" Wettquote : besitzt
 Benutzer "1" -- "*" Wette : platziert
