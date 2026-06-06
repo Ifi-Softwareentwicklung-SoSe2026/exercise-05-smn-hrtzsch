@@ -19,7 +19,7 @@ tags: [Sommersemester2026, Softwareentwicklung, Übung05]
 
 -->
 
-[![LiaScript Course](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://raw.githubusercontent.com/Ifi-Softwareentwicklung-SoSe2026/exercise_05/refs/heads/main/README.md)
+[![LiaScript Course](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://raw.githubusercontent.com/Ifi-Softwareentwicklung-SoSe2026/exercise-05-smn-hrtzsch/refs/heads/main/README.md)
 
 # Aufgabe 05
 
@@ -119,4 +119,60 @@ Kevin ersetzt den folgenden Platzhalter mit einem LiaScript-kompatiblen PlantUML
 - [plantUml Editor](https://pantuml.com)
 - paste and copy your code! Mit Reloads verlieren Sie Ihre Eingaben, daher vorher sichern!
 
-<!-- kevin:uml-diagram -->
+<!-- kevin-uml:start -->
+```text
+@startuml
+class Turnier {
+  - name: String
+}
+
+class Gruppe {
+  - name: String
+}
+
+class Mannschaft {
+  - name: String
+}
+
+class Spiel {
+  - spielId: String
+  - datum: Date
+  - uhrzeit: Time
+  - ergebnis: String
+  + setErgebnis(ergebnis: String)
+}
+
+class Wettquote {
+  - wettTyp: String
+  - quote: double
+}
+
+class Benutzer {
+  - name: String
+  - guthaben: double
+}
+
+class Wette {
+  - wettTyp: String
+  - quote: double
+  - einsatz: double
+}
+
+class PersistenceManager {
+  + save(data: Object)
+  + load(): Object
+}
+
+Turnier "1" *-- "*" Gruppe : besitzt
+Gruppe "1" *-- "*" Mannschaft : enthält
+Mannschaft "2" -- "*" Spiel : nimmt teil (Heim/Auswärts)
+Spiel "1" *-- "*" Wettquote : besitzt
+Benutzer "1" -- "*" Wette : platziert
+Spiel "1" -- "*" Wette : bezieht sich auf
+PersistenceManager ..> Spiel : persistiert
+PersistenceManager ..> Wette : persistiert
+PersistenceManager ..> Benutzer : persistiert
+@enduml
+@plantUML.eval(png)
+```
+<!-- kevin-uml:end -->
