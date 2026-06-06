@@ -125,6 +125,24 @@ static void PrintTournament(Tournament tournament)
             Console.WriteLine($"{match.MatchId}: {match.HomeTeam.Name} vs {match.AwayTeam.Name} am {match.Kickoff:yyyy-MM-dd HH:mm} Ergebnis: {match.Result ?? "offen"}");
         }
     }
+
+    if (tournament.Users.Count > 0)
+    {
+        Console.WriteLine("Benutzer");
+        foreach (var user in tournament.Users)
+        {
+            Console.WriteLine($"{user.Name}: Guthaben {user.Balance}");
+        }
+    }
+
+    if (tournament.Bets.Count > 0)
+    {
+        Console.WriteLine("Wetten");
+        foreach (var bet in tournament.Bets)
+        {
+            Console.WriteLine($"{bet.Player}: {bet.MatchId} {bet.BetType} Einsatz {bet.Amount} Quote {bet.Quote} Abgerechnet: {bet.IsSettled}");
+        }
+    }
 }
 
 public sealed record Team(string Name);
