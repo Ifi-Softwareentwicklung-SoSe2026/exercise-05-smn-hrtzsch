@@ -1,0 +1,6 @@
+{
+  "agent_workflow": {
+    "exercise": "exercise05",
+    "workflow": "agent-implements-issue"
+  }
+}

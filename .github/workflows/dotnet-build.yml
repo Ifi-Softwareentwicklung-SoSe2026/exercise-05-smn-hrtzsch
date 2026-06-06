@@ -1,0 +1,69 @@
+name: dotnet-build
+
+on:
+  push:
+    paths:
+      - "**/*.cs"
+      - "**/*.csproj"
+      - "**/*.sln"
+  workflow_dispatch:
+
+jobs:
+  dotnet-build:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Discover C# projects
+        id: discover
+        run: |
+          mapfile -t projects < <(git ls-files '*.csproj')
+          if [ ${#projects[@]} -eq 0 ]; then
+            echo "No .csproj files found."
+            exit 1
+          fi
+          {
+            echo "projects<<EOF"
+            printf '%s\n' "${projects[@]}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Restore + Build all projects
+        run: |
+          while IFS= read -r project; do
+            [ -n "$project" ] || continue
+            echo "Building $project"
+            dotnet restore "$project"
+            dotnet build "$project" --configuration Release --no-restore
+          done <<< "${{ steps.discover.outputs.projects }}"
+
+      - name: Run executable projects and capture output
+        run: |
+          mkdir -p run-logs
+          while IFS= read -r project; do
+            [ -n "$project" ] || continue
+            if grep -q '<OutputType>Exe</OutputType>' "$project"; then
+              project_dir="$(dirname "$project")"
+              project_name="$(basename "$project" .csproj)"
+              echo "Running $project in $project_dir"
+              timeout 20s dotnet run --project "$project" --configuration Release > "run-logs/${project_name}.log"
+              echo "--- ${project_name}.log ---"
+              cat "run-logs/${project_name}.log"
+            fi
+          done <<< "${{ steps.discover.outputs.projects }}"
+
+      - name: Upload run logs
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: dotnet-run-logs
+          path: run-logs/*.log
+          if-no-files-found: ignore
