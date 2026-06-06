@@ -21,8 +21,46 @@ switch (command)
         PrintTournament(loaded);
         break;
 
+    case "set":
+        if (args.Length != 4 || !decimal.TryParse(args[3], out var quote))
+        {
+            Console.WriteLine("Verwendung: set <spielid> <Wetttyp> <Wettquote>");
+            Environment.ExitCode = 1;
+            break;
+        }
+        var tournamentWithQuote = TournamentStore.LoadOrCreate(dataPath);
+        var matchForQuote = tournamentWithQuote.FindMatch(args[1]);
+        if (matchForQuote is null)
+        {
+            Console.WriteLine($"Spiel-ID nicht gefunden: {args[1]}");
+            Environment.ExitCode = 1;
+            break;
+        }
+        matchForQuote.Odds[args[2]] = quote;
+        TournamentStore.Save(dataPath, tournamentWithQuote);
+        Console.WriteLine($"Quote gespeichert: {matchForQuote.MatchId} {args[2]} = {quote}");
+        break;
+
+    case "get":
+        if (args.Length != 3)
+        {
+            Console.WriteLine("Verwendung: get <spielid> <Wetttyp>");
+            Environment.ExitCode = 1;
+            break;
+        }
+        var tournamentForLookup = TournamentStore.LoadOrCreate(dataPath);
+        var matchForLookup = tournamentForLookup.FindMatch(args[1]);
+        if (matchForLookup is null || !matchForLookup.Odds.TryGetValue(args[2], out var storedQuote))
+        {
+            Console.WriteLine($"Keine Quote gefunden: {args[1]} {args[2]}");
+            Environment.ExitCode = 1;
+            break;
+        }
+        Console.WriteLine($"{matchForLookup.MatchId} {args[2]} = {storedQuote}");
+        break;
+
     default:
-        Console.WriteLine("Unbekannter Befehl. Verfuegbar: new, print");
+        Console.WriteLine("Unbekannter Befehl. Verfügbar: new, print, set, get");
         Environment.ExitCode = 1;
         break;
 }
@@ -47,12 +85,20 @@ public sealed record Match(
     Team HomeTeam,
     Team AwayTeam,
     DateTime Kickoff,
-    string? Result = null);
+    string? Result = null,
+    Dictionary<string, decimal>? Odds = null)
+{
+    public Dictionary<string, decimal> Odds { get; init; } = Odds ?? new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
+}
 
 public sealed record Group(string Name, List<Team> Teams, List<Match> Matches);
 
 public sealed record Tournament(string Name, List<Group> Groups)
 {
+    public Match? FindMatch(string matchId) => Groups
+        .SelectMany(group => group.Matches)
+        .FirstOrDefault(match => string.Equals(match.MatchId, matchId, StringComparison.OrdinalIgnoreCase));
+
     public static Tournament CreateWorldCupGroupStage()
     {
         var groupA = CreateGroup("A", "Deutschland", "Schottland", "Ungarn", "Schweiz", new DateTime(2026, 6, 11, 20, 0, 0));
