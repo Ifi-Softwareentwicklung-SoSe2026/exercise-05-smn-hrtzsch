@@ -214,7 +214,25 @@ public sealed record Tournament(string Name, List<Group> Groups, List<User>? Use
             return false;
         }
 
-        return bet.BetType.Equals("Siegwette", StringComparison.OrdinalIgnoreCase) && homeGoals > awayGoals;
+        var betType = bet.BetType.Trim().ToLowerInvariant();
+        if (betType is "siegwette" or "heimsieg" or "home" or "homewin")
+        {
+            return homeGoals > awayGoals;
+        }
+        if (betType is "auswärtssieg" or "auswaertssieg" or "away" or "awaywin")
+        {
+            return awayGoals > homeGoals;
+        }
+        if (betType is "unentschieden" or "remis" or "draw")
+        {
+            return homeGoals == awayGoals;
+        }
+        if (TryExtractScoreFromBetType(betType, out var expectedHomeGoals, out var expectedAwayGoals))
+        {
+            return homeGoals == expectedHomeGoals && awayGoals == expectedAwayGoals;
+        }
+
+        return false;
     }
 
     private static bool TryParseScore(string score, out int homeGoals, out int awayGoals)
@@ -223,6 +241,14 @@ public sealed record Tournament(string Name, List<Group> Groups, List<User>? Use
         awayGoals = 0;
         var parts = score.Split(':', 2);
         return parts.Length == 2 && int.TryParse(parts[0], out homeGoals) && int.TryParse(parts[1], out awayGoals);
+    }
+
+    private static bool TryExtractScoreFromBetType(string betType, out int homeGoals, out int awayGoals)
+    {
+        homeGoals = 0;
+        awayGoals = 0;
+        var marker = betType.Split(' ', '-', '_').FirstOrDefault(part => part.Contains(':'));
+        return marker is not null && TryParseScore(marker, out homeGoals, out awayGoals);
     }
 
     public static Tournament CreateWorldCupGroupStage()
