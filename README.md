@@ -19,7 +19,7 @@ tags: [Sommersemester2026, Softwareentwicklung, Übung05]
 
 -->
 
-[![LiaScript Course](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://raw.githubusercontent.com/Ifi-Softwareentwicklung-SoSe2026/exercise_05/refs/heads/main/README.md)
+[![LiaScript Course](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://raw.githubusercontent.com/Ifi-Softwareentwicklung-SoSe2026/exercise-05-smn-hrtzsch/refs/heads/main/README.md)
 
 # Aufgabe 05
 
@@ -119,4 +119,77 @@ Kevin ersetzt den folgenden Platzhalter mit einem LiaScript-kompatiblen PlantUML
 - [plantUml Editor](https://pantuml.com)
 - paste and copy your code! Mit Reloads verlieren Sie Ihre Eingaben, daher vorher sichern!
 
-<!-- kevin:uml-diagram -->
+<!-- kevin-uml:start -->
+```text @plantUML
+@startuml
+skinparam classAttributeIconSize 0
+
+class Gruppe {
+    - name: String
+    - teams: List<Mannschaft>
+    + addTeam(team: Mannschaft): void
+}
+
+class Mannschaft {
+    - name: String
+    + getName(): String
+}
+
+class Spiel {
+    - spielId: String
+    - datum: Date
+    - uhrzeit: Time
+    - heimMannschaft: Mannschaft
+    - auswaertsMannschaft: Mannschaft
+    - ergebnis: String
+    - quoten: Map<Wetttyp, Double>
+    + setErgebnis(res: String): void
+    + setQuote(typ: Wetttyp, quote: Double): void
+    + getQuote(typ: Wetttyp): Double
+}
+
+class Benutzer {
+    - name: String
+    - guthaben: double
+    + updateGuthaben(amount: double): void
+}
+
+class Wette {
+    - wetttyp: Wetttyp
+    - quote: double
+    - einsatz: double
+    - istAusgewertet: boolean
+    + berechneGewinn(ergebnis: String): double
+}
+
+enum Wetttyp {
+    SIEGWETTE
+    ERGEBNISWETTE
+}
+
+class TurnierManager {
+    - gruppen: List<Gruppe>
+    - spiele: List<Spiel>
+    - benutzer: List<Benutzer>
+    - wetten: List<Wette>
+    + saveToJson(filePath: String): void
+    + loadFromJson(filePath: String): void
+    + processResult(spielId: String, result: String): void
+}
+
+Gruppe "1" *-- "*" Mannschaft : enthält
+Spiel "*" o-- "2" Mannschaft : beteiligt
+Spiel "1" *-- "*" Wetttyp : bietet Quoten für
+Wette "*" o-- "1" Benutzer : platziert von
+Wette "*" o-- "1" Spiel : bezieht sich auf
+TurnierManager "1" o-- "*" Gruppe
+TurnierManager "1" o-- "*" Spiel
+TurnierManager "1" o-- "*" Benutzer
+TurnierManager "1" o-- "*" Wette
+
+note right of TurnierManager : Steuert die CLI-Befehle
+(new, print, set, get, bid, result)
+@enduml
+```
+@plantUML.eval(png)
+<!-- kevin-uml:end -->
