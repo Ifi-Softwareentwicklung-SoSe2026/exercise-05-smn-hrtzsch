@@ -126,8 +126,7 @@ skinparam classAttributeIconSize 0
 
 class Gruppe {
     - name: String
-    - teams: List<Mannschaft>
-    + addTeam(team: Mannschaft): void
+    + getTeams(): List<Mannschaft>
 }
 
 class Mannschaft {
@@ -139,13 +138,15 @@ class Spiel {
     - spielId: String
     - datum: Date
     - uhrzeit: Time
-    - heimMannschaft: Mannschaft
-    - auswaertsMannschaft: Mannschaft
     - ergebnis: String
-    - quoten: Map<Wetttyp, Double>
     + setErgebnis(res: String): void
-    + setQuote(typ: Wetttyp, quote: Double): void
-    + getQuote(typ: Wetttyp): Double
+    + getSpielId(): String
+}
+
+class Quote {
+    - wert: double
+    + getWert(): double
+    + setWert(wert: double): void
 }
 
 class Benutzer {
@@ -156,7 +157,7 @@ class Benutzer {
 
 class Wette {
     - wetttyp: Wetttyp
-    - quote: double
+    - quoteZumZeitpunkt: double
     - einsatz: double
     - istAusgewertet: boolean
     + berechneGewinn(ergebnis: String): double
@@ -172,22 +173,29 @@ class TurnierManager {
     - spiele: List<Spiel>
     - benutzer: List<Benutzer>
     - wetten: List<Wette>
+    - quoten: List<Quote>
     + saveToFile(filename: String): void
     + loadFromFile(filename: String): void
+    + setQuote(spielId: String, typ: Wetttyp, wert: double): void
+    + getQuote(spielId: String, typ: Wetttyp): double
+    + placeBid(playerName: String, spielId: String, typ: Wetttyp, amount: double): void
     + processResult(spielId: String, result: String): void
 }
 
 Gruppe "1" *-- "*" Mannschaft : enthält
 Spiel "*" o-- "2" Mannschaft : beteiligt
-Spiel "1" *-- "*" Wetttyp : bietet Quoten für
+Quote "*" o-- "1" Spiel : gehört zu
+Quote "*" o-- "1" Wetttyp : definiert für
 Wette "*" o-- "1" Benutzer : platziert von
 Wette "*" o-- "1" Spiel : bezieht sich auf
+Wette "*" o-- "1" Wetttyp : Typ der Wette
 TurnierManager "1" o-- "*" Gruppe
 TurnierManager "1" o-- "*" Spiel
 TurnierManager "1" o-- "*" Benutzer
 TurnierManager "1" o-- "*" Wette
+TurnierManager "1" o-- "*" Quote
 
-note right of TurnierManager : Steuert die CLI-Befehle
+note right of TurnierManager : Implementiert die CLI-Logik
 (new, print, set, get, bid, result)
 @enduml
 ```
